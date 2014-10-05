@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="GB18030"?>
+<students>
+	<student id="001">
+		<name>xiaobao</name>
+		<sex>男</sex>
+		<age>22</age>
+	</student>
+	<student id="002">
+		<name>wangjing</name>
+		<sex>女</sex>
+		<age>22</age>
+	</student>
+	<student id="003">
+		<name>liuchun</name>
+		<sex>男</sex>
+		<age>23</age>
+	</student>
+	<student id="004">
+		<name>zhujun</name>
+		<sex>男</sex>
+		<age>22</age>
+	</student>
+</students>

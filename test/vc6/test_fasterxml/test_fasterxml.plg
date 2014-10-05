@@ -1,0 +1,57 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: press_fasterxml - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP162.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/press_fasterxml.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Work\C Projects\fasterxml-1.0.0\test\press_fasterxml.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP162.tmp" 
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP163.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib fasterxml.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/press_fasterxml.pdb" /debug /machine:I386 /out:"Debug/press_fasterxml.exe" /pdbtype:sept 
+".\Debug\press_fasterxml.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP163.tmp"
+<h3>Output Window</h3>
+Compiling...
+press_fasterxml.c
+Linking...
+
+
+
+<h3>Results</h3>
+press_fasterxml.exe - 0 error(s), 0 warning(s)
+<h3>
+--------------------Configuration: test_fasterxml - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP165.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/test_fasterxml.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Work\C Projects\fasterxml-1.0.0\test\test_fasterxml.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP165.tmp" 
+Creating temporary file "C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP166.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib fasterxml.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/test_fasterxml.pdb" /debug /machine:I386 /out:"Debug/test_fasterxml.exe" /pdbtype:sept 
+".\Debug\test_fasterxml.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\calvin\LOCALS~1\Temp\RSP166.tmp"
+<h3>Output Window</h3>
+Compiling...
+test_fasterxml.c
+Linking...
+
+
+
+<h3>Results</h3>
+test_fasterxml.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

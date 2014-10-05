@@ -1,0 +1,190 @@
+fasterxml - the faster xml parser
+
+1.Overview
+2.Compiling and installation
+3.Basic Use
+4.Performance
+5.Finally
+
+------------------------------------------------------------
+
+1.Overview
+
+Fasterxml is a XML(SAX) parser. It directly parse XML text, call registered event functions, fast access XML content of your interest.
+Fasterxml is used in access XML data read-only, such as parsing XML configuration file, or unpacking large XML. Because it is not like the DOM model need to construct a complete document tree, so the speed is very fast, almost close to the performance of strlen(). 
+Fasterxml is very small, the entire source code consists of a pair fasterxml.h and fasterxml.c,500 lines,13KB,not depend on any other libraries, easily embedded in your project.
+
+2.Compiling and installation
+
+for example, Linux
+[code]
+$ cd src
+$ make -f makefile.Linux install
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -I.  -c fasterxml.c
+gcc -g -fPIC -O2 -Wall -Werror -fno-strict-aliasing -o libfasterxml.so fasterxml.o -shared -L.
+cp -f libfasterxml.so /usr/lib/exlib/
+cp -f fasterxml.h /usr/include/fasterxml/
+[/code]
+
+3.Basic Use
+
+Only three interface functions in fasterxml
+
+[code]
+typedef int funcCallbackOnXmlNode( int type , char *xpath , int xpath_len , int xpath_size , char *node , int node_len , char *properties , int properties_len , char *content , int content_len , void *p );
+int TravelXmlBuffer( char *xml_buffer , char *xpath , int xpath_size
+		 , funcCallbackOnXmlNode *pfuncCallbackOnXmlNode
+		 , void *p );
+int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_size
+		 , funcCallbackOnXmlNode *pfuncCallbackOnXmlNode
+		 , funcCallbackOnXmlNode *pfuncCallbackOnEnterXmlNode
+		 , funcCallbackOnXmlNode *pfuncCallbackOnLeaveXmlNode
+		 , funcCallbackOnXmlNode *pfuncCallbackOnXmlLeaf
+		 , void *p );
+[/code]
+Function TravelXmlBuffer() read XML text and fast parsing, call pfuncCallbackOnXmlNode() when accessing XML branches or leaves , application can be determined branches or leaves events by type and xpath, visit data interested.
+Function TravelXmlBuffer4 is event subdivided version.
+access attributes of the current node collection
+[code]
+typedef int funcCallbackOnXmlProperty( char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , void *p );
+_WINDLL_FUNC int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpath , int xpath_len , int xpath_size
+					   , funcCallbackOnXmlProperty *pfuncCallbackOnXmlProperty
+					   , void *p );
+[/code]
+
+The following is a simple example
+[code]
+funcCallbackOnXmlProperty CallbackOnXmlProperty ;
+int CallbackOnXmlProperty( char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , void *p )
+{
+	printf( "    PROPERTY p[%s] xpath[%s] propname[%.*s] propvalue[%.*s]\n" , (char*)p , xpath , propname_len , propname , propvalue_len , propvalue );
+	
+	return 0;
+}
+
+funcCallbackOnXmlNode CallbackOnXmlNode ;
+int CallbackOnXmlNode( int type , char *xpath , int xpath_len , int xpath_size , char *nodename , int nodename_len , char *properties , int properties_len , char *content , int content_len , void *p )
+{
+	int		nret = 0 ;
+	
+	if( type & FASTXML_NODE_BRANCH )
+	{
+		if( type & FASTXML_NODE_ENTER )
+		{
+			printf( "ENTER-BRANCH p[%s] xpath[%s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath , nodename_len , nodename , properties_len , properties );
+		}
+		else if( type & FASTXML_NODE_LEAVE )
+		{
+			printf( "LEAVE-BRANCH p[%s] xpath[%s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath , nodename_len , nodename , properties_len , properties );
+		}
+		else
+		{
+			printf( "BRANCH       p[%s] xpath[%s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath , nodename_len , nodename , properties_len , properties );
+		}
+	}
+	else if( type & FASTXML_NODE_LEAF )
+	{
+		printf( "LEAF         p[%s] xpath[%s] nodename[%.*s] properties[%.*s] content[%.*s]\n" , (char*)p , xpath , nodename_len , nodename , properties_len , properties , content_len , content );
+	}
+
+	if( properties && properties[0] )
+	{
+		nret = TravelXmlPropertiesBuffer( properties , properties_len , xpath , xpath_len , xpath_size , & CallbackOnXmlProperty , p ) ;
+		if ( nret )
+			return nret;
+	}
+	
+	return 0;
+}
+
+...
+char	xpath[ 1024 + 1 ] ;
+char	*xml_buffer = NULL ;
+char	*p = "hello world" ;
+
+memset( xpath , 0x00 , sizeof(xpath) );
+nret = TravelXmlBuffer( xml_buffer , xpath , sizeof(xpath) , & CallbackOnXmlNode , p ) ;
+free( xml_buffer );
+if( nret && nret != FASTXML_INFO_END_OF_BUFFER )
+{
+	printf( "TravelXmlTree failed[%d]\n" , nret );
+	return nret;
+}
+...
+[/code]
+
+For output
+[code]
+$ cat test_basic.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<leaf>content</leaf>
+	<sub_branch>
+		<sub_leaf>sub_content</sub_leaf>
+	</sub_branch>
+	<self_branch />
+	<self_branch2/>
+	<branch_has_property propname1=propvalue1>
+		<leaf_has_property propname1="prop value1" propname2="prop value2" >content</leaf_has_property>
+	</branch_has_property>
+</root>
+$ test_fasterxml test_basic.xml
+BRANCH       p[hello world] xpath[/xml] nodename[xml] properties[ version="1.0" encoding="UTF-8"?]
+    PROPERTY p[hello world] xpath[/xml.version] propname[version] propvalue[1.0]
+    PROPERTY p[hello world] xpath[/xml.encoding] propname[encoding] propvalue[UTF-8]
+ENTER-BRANCH p[hello world] xpath[/root] nodename[root] properties[]
+LEAF         p[hello world] xpath[/root/leaf] nodename[leaf] properties[] content[content]
+ENTER-BRANCH p[hello world] xpath[/root/sub_branch] nodename[sub_branch] properties[]
+LEAF         p[hello world] xpath[/root/sub_branch/sub_leaf] nodename[sub_leaf] properties[] content[sub_content]
+LEAVE-BRANCH p[hello world] xpath[/root/sub_branch] nodename[sub_branch] properties[]
+BRANCH       p[hello world] xpath[/root/self_branch] nodename[self_branch] properties[ /]
+BRANCH       p[hello world] xpath[/root/self_branch2] nodename[self_branch2] properties[/]
+ENTER-BRANCH p[hello world] xpath[/root/branch_has_property] nodename[branch_has_property] properties[ propname1=propvalue1]
+    PROPERTY p[hello world] xpath[/root/branch_has_property.propname1] propname[propname1] propvalue[propvalue1]
+LEAF         p[hello world] xpath[/root/branch_has_property/leaf_has_property] nodename[leaf_has_property] properties[ propname1="prop value1" propname2="prop value2" ] content[content]
+    PROPERTY p[hello world] xpath[/root/branch_has_property/leaf_has_property.propname1] propname[propname1] propvalue[prop value1]
+    PROPERTY p[hello world] xpath[/root/branch_has_property/leaf_has_property.propname2] propname[propname2] propvalue[prop value2]
+LEAVE-BRANCH p[hello world] xpath[/root/branch_has_property] nodename[branch_has_property] properties[]
+LEAVE-BRANCH p[hello world] xpath[/root] nodename[root] properties[]
+[/code]
+
+You can transform event callback function, rapid access XML nodes, for example, according to certain XPATH then fill c struct members.
+
+4.Performance
+
+Fastxml's performance is very high, below is fasterxml and rapidxml pressure measurement
+[code]
+~/exsrc/fasterxml-1.0.0/test $ ls -l test_big_and_lang.xml
+-rw-r--r-- 1 calvin calvin 622511 Sep 21 10:51 test_big_and_lang.xml
+~/exsrc/fasterxml-1.0.0/test $ wc test_big_and_lang.xml
+17870  26332 622511 test_big_and_lang.xml
+[/code]
+
+fasterxml runs 10 times, get the best results
+[code]
+~/exsrc/fasterxml-1.0.0/test $ time ./press_fastxml test_big_and_lang.xml 1000
+Elapse 5 seconds
+real    0m5.130s
+user    0m3.402s
+sys     0m0.007s
+[/code]
+Iterates through all leaves and branches on 1000 times, it took about 5 seconds.
+
+rapidxml runs 10 times, get the best results
+[code]
+~/exsrc/fasterxml-1.0.0/test_rapidxml $ time ./press_rapidxml ../test/test_big_and_lang.xml 1000
+Elapse 19 seconds
+
+real    0m19.169s
+user    0m0.923s
+sys     0m18.265s
+[/code]
+Iterates through all leaves and branches on 1000 times, it took about 19 seconds.
+
+fasterxml is faster than rapidxml about 3 times.
+
+5.Finally
+
+Welcome to use fasterxml, if you have any problems, please tell me, thank you ^_^
+Project home page : [url]https://github.com/calvinwilliams/fasterxml[/url]
+Author email      : calvinwilliams.c@gmail.com

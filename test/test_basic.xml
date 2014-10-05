@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<leaf>content</leaf>
+	<sub_branch>
+		<sub_leaf>sub_content</sub_leaf>
+	</sub_branch>
+	<self_branch />
+	<self_branch2/>
+	<branch_has_property propname1=propvalue1>
+		<leaf_has_property propname1="prop value1" propname2="prop value2" >content</leaf_has_property>
+	</branch_has_property>
+</root>
