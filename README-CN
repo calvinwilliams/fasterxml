@@ -10,7 +10,7 @@ fasterxml - 最快的XML解析器
 
 1.概述
 
-fasterxml是一个SAX模式的XML解析器。它直接解析XML文本，调用注册的事件函数，快速访问XML中感兴趣的内容。
+fasterxml是一个快速SAX模式的XML解析器。它直接解析XML文本，调用注册的事件函数，快速访问XML中感兴趣的内容。
 fasterxml主要用于只读方式挖掘XML数据到应用对象中，如XML配置文件解析、大型XML报文解包。因为它不像DOM模式需要先构造一个完整的文档树，所以速度非常快，几乎接近strlen的性能。
 fasterxml非常小巧，整个源代码由一对fasterxml.h,fasterxml.c组成，500行，13KB，不依赖于任何其它库，容易嵌入到您的项目中。
 

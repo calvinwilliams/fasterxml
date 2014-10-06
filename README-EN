@@ -10,7 +10,7 @@ fasterxml - the faster xml parser
 
 1.Overview
 
-Fasterxml is a XML(SAX) parser. It directly parse XML text, call registered event functions, fast access XML content of your interest.
+Fasterxml is a fast XML(SAX) parser. It directly parse XML text, call registered event functions, fast access XML content of your interest.
 Fasterxml is used in access XML data read-only, such as parsing XML configuration file, or unpacking large XML. Because it is not like the DOM model need to construct a complete document tree, so the speed is very fast, almost close to the performance of strlen(). 
 Fasterxml is very small, the entire source code consists of a pair fasterxml.h and fasterxml.c,500 lines,13KB,not depend on any other libraries, easily embedded in your project.
 
