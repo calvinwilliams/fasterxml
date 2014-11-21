@@ -129,7 +129,7 @@ int CallbackOnXmlNode( int type , char *xpath , int xpath_len , int xpath_size ,
 	{
 		printf( "LEAF         p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s] content[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties , content_len , content );
 	}
-
+	
 	if( properties && properties[0] )
 	{
 		nret = TravelXmlPropertiesBuffer( properties , properties_len , xpath , xpath_len , xpath_size , & CallbackOnXmlProperty , p ) ;

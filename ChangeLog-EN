@@ -1,2 +1,6 @@
+ver 1.0.1	2014-11-19	calvin
+		* Fixed some bugs
+		* Add function AddSkipXmlTag,CleanSkipXmlTags for parse HTML
+
 ver 1.0.0	2014-09-16	calvin
 		* create

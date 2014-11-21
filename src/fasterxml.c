@@ -5,20 +5,67 @@
 #define STRNCMP(_a_,_C_,_b_,_n_) ( strncmp(_a_,_b_,_n_) _C_ 0 )
 #endif
 
+#ifndef STRICMP
+#if ( defined _WIN32 )
+#define STRICMP(_a_,_C_,_b_) ( stricmp(_a_,_b_) _C_ 0 )
+#define STRNICMP(_a_,_C_,_b_,_n_) ( strnicmp(_a_,_b_,_n_) _C_ 0 )
+#elif ( defined __unix ) || ( defined __linux )
+#define STRICMP(_a_,_C_,_b_) ( strcasecmp(_a_,_b_) _C_ 0 )
+#define STRNICMP(_a_,_C_,_b_,_n_) ( strncasecmp(_a_,_b_,_n_) _C_ 0 )
+#endif
+#endif
+
 #ifndef MAX
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-char __FASTERXML_VERSION[] = "1.0.0" ;
+int __FASTERXML_VERSION_1_0_1 ;
 
-#define FASTERXML_TOKEN_EOF		-1
-#define FASTERXML_TOKEN_LAB		1	/* < or <? */
+#define MAXCNT_SKIPTAG		16
+
+char	*g_pcSkipXmlTags[ MAXCNT_SKIPTAG + 1 ] = { NULL } ;
+int	g_nSkipXmlTagsLen[ MAXCNT_SKIPTAG + 1 ] = { 0 } ;
+int	g_nSkipXmlTagCount = 0 ;
+
+int AddSkipXmlTag( char *tag )
+{
+	if( g_nSkipXmlTagCount + 1 > MAXCNT_SKIPTAG )
+		return FASTERXML_ERROR_TOO_MANY_SKIPTAGS;
+	
+	g_pcSkipXmlTags[g_nSkipXmlTagCount] = strdup( tag ) ;
+	if( g_pcSkipXmlTags[g_nSkipXmlTagCount] == NULL )
+		return FASTERXML_ERROR_ALLOC;
+	g_nSkipXmlTagsLen[g_nSkipXmlTagCount] = strlen(g_pcSkipXmlTags[g_nSkipXmlTagCount]) ;
+	
+	g_nSkipXmlTagCount++;
+	
+	return 0;
+}
+
+void CleanSkipXmlTags()
+{
+	for( g_nSkipXmlTagCount-- ; g_nSkipXmlTagCount >= 0 ; g_nSkipXmlTagCount-- )
+	{
+		if( g_pcSkipXmlTags[g_nSkipXmlTagCount] != NULL )
+		{
+			free( g_pcSkipXmlTags[g_nSkipXmlTagCount] );
+			g_pcSkipXmlTags[g_nSkipXmlTagCount] = NULL ;
+			g_nSkipXmlTagsLen[g_nSkipXmlTagCount] = 0 ;
+		}
+	}
+	return;
+}
+
+#define FASTERXML_TOKEN_EOF		0	
+#define FASTERXML_TOKEN_LAB		1	/* < */
+#define FASTERXML_TOKEN_LAB_SP		2	/* <? or <! */
 #define FASTERXML_TOKEN_SLASH		3	/* / or ? */
 #define FASTERXML_TOKEN_RAB		4	/* > */
 #define FASTERXML_TOKEN_RHAB		5	/* ?> */
 #define FASTERXML_TOKEN_TEXT		6
 #define FASTERXML_TOKEN_PROPNAME	11
 #define FASTERXML_TOKEN_PROPVALUE	12
+#define FASTERXML_TOKEN_EQ		15
 
 #define TOKENPROPERTY(_base_,_begin_,_len_,_eof_ret_)			\
 	do								\
@@ -117,7 +164,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 		
 		TOKENPROPERTY( properties , begin , len , FASTERXML_ERROR_XML_INVALID )
 		if( ! ( begin[0] == '=' && len == 1 ) )
-			return FASTERXML_ERROR_XML_INVALID;
+			return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_EQ;
 		
 		TOKENPROPERTY( properties , begin , len , FASTERXML_ERROR_XML_INVALID )
 		propvalue = begin ;
@@ -170,7 +217,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 			return FASTERXML_ERROR_XML_INVALID;		\
 		}							\
 		(_len_) = (_base_) - (_begin_) ;			\
-		(_tag_) = FASTERXML_TOKEN_TEXT ;				\
+		(_tag_) = FASTERXML_TOKEN_TEXT ;			\
 	}								\
 	while(0);							\
 
@@ -218,7 +265,14 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 				(_begin_) = (_base_) ;			\
 				(_len_) = 2 ;				\
 				(_base_)+=2;				\
-				(_tag_) = FASTERXML_TOKEN_LAB ;		\
+				(_tag_) = FASTERXML_TOKEN_LAB_SP ;	\
+			}						\
+			else if( (_base_)[1] == '!' )			\
+			{						\
+				(_begin_) = (_base_) ;			\
+				(_len_) = 2 ;				\
+				(_base_)+=2;				\
+				(_tag_) = FASTERXML_TOKEN_LAB_SP ;	\
 			}						\
 			else						\
 			{						\
@@ -234,7 +288,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 			(_begin_) = (_base_) ;				\
 			(_len_) = 1 ;					\
 			(_base_)++;					\
-			(_tag_) = FASTERXML_TOKEN_SLASH ;			\
+			(_tag_) = FASTERXML_TOKEN_SLASH ;		\
 			break;						\
 		}							\
 		if( (_base_)[0] == '>' )				\
@@ -253,7 +307,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 			if( strchr( " \t\r\n</?>" , *(_base_) ) )	\
 			{						\
 				(_len_) = (_base_) - (_begin_) ;	\
-				(_tag_) = FASTERXML_TOKEN_TEXT ;		\
+				(_tag_) = FASTERXML_TOKEN_TEXT ;	\
 				break;					\
 			}						\
 		}							\
@@ -269,16 +323,17 @@ static int _TravelXmlBuffer( register char **xml_ptr , char *xpath , int xpath_l
 	, funcCallbackOnXmlNode *pfuncCallbackOnEnterXmlNode
 	, funcCallbackOnXmlNode *pfuncCallbackOnLeaveXmlNode
 	, funcCallbackOnXmlNode *pfuncCallbackOnXmlLeaf
-	, void *p , char *preread_nodename , int preread_nodename_len )
+	, void *p , char *preread_node , int preread_node_len )
 {
-	char		*begin ;
+	char		*begin = NULL ;
 	int		len ;
 	signed char	tag ;
 	
 	int		close_flag ;
+	int		i ;
 	
-	char		*nodename = NULL ;
-	int		nodename_len ;
+	char		*node = NULL ;
+	int		node_len ;
 	char		*properties ;
 	int		properties_len ;
 	char		*content = NULL ;
@@ -290,34 +345,90 @@ static int _TravelXmlBuffer( register char **xml_ptr , char *xpath , int xpath_l
 	
 	while(1)
 	{
-		if( preread_nodename )
+		close_flag = 0 ;
+		
+		if( preread_node )
 		{
-			nodename = preread_nodename ;
-			nodename_len = preread_nodename_len ;
-			preread_nodename = NULL ;
-			goto _SKIP2;
+			node = preread_node ;
+			node_len = preread_node_len ;
+			preread_node = NULL ;
+			goto _PREREAD_GO;
 		}
 		
-		TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_INFO_END_OF_BUFFER)
-		if( tag != FASTERXML_TOKEN_LAB )
+		while(1)
+		{
+			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_INFO_END_OF_BUFFER)
+			if( tag == FASTERXML_TOKEN_LAB || tag == FASTERXML_TOKEN_LAB_SP )
+				break;
+		}
+		if( tag == FASTERXML_TOKEN_LAB_SP )
+			close_flag = 1 ;
+		
+		TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_SLASH)
+		if( tag == FASTERXML_TOKEN_SLASH )
+		{
+			char	*p = (*xml_ptr) ;
+			TOKENXML(p,begin,len,tag,FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_TEXT)
+			if( tag != FASTERXML_TOKEN_TEXT )
+				return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_TEXT;
+			
+			for( i = 0 ; i < g_nSkipXmlTagCount ; i++ )
+			{
+				if( len == g_nSkipXmlTagsLen[i] && STRNCMP( begin , == , g_pcSkipXmlTags[i] , len ) )
+					break;
+			}
+			if( i < g_nSkipXmlTagCount )
+				continue;
+			
+			break;
+		}
+		
+		node = begin ;
+		node_len = len ;
+		
+_PREREAD_GO :
+		properties = (*xml_ptr) ;
+		
+		for( ; *(*xml_ptr) ; (*xml_ptr)++ )
+		{
+			if( strchr( "\"'" , *(*xml_ptr) ) )
+			{
+				begin = (*xml_ptr) ;
+				for( (*xml_ptr)++ ; *(*xml_ptr) ; (*xml_ptr)++ )
+				{
+					if( *(*xml_ptr) == (*begin) )
+						break;
+				}
+				if( *(*xml_ptr) == '\0' )
+					return FASTERXML_ERROR_XML_INVALID;
+			}
+			else if( *(*xml_ptr) == '/' )
+			{
+				close_flag = 1 ;
+			}
+			else if( *(*xml_ptr) == '>' )
+			{
+				(*xml_ptr)++;
+				break;
+			}
+		}
+		if( *(*xml_ptr) == '\0' )
 			return FASTERXML_ERROR_XML_INVALID;
 		
-		TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
-		if( tag == FASTERXML_TOKEN_SLASH )
-			break;
-		
-		nodename = begin ;
-		nodename_len = len ;
-		
-_SKIP2 :
-		properties = (*xml_ptr) ;
+		for( i = 0 ; i < g_nSkipXmlTagCount ; i++ )
+		{
+			if( node_len == g_nSkipXmlTagsLen[i] && STRNCMP( node , == , g_pcSkipXmlTags[i] , node_len ) )
+				break;
+		}
+		if( i < g_nSkipXmlTagCount )
+			continue;
 		
 		if( xpath )
 		{
-			if( xpath_len + 1 + nodename_len < xpath_size-1 - 1 )
+			if( xpath_len + 1 + node_len < xpath_size-1 - 1 )
 			{
-				sprintf( xpath + xpath_len , "/%.*s" , (int)nodename_len , nodename );
-				xpath_newlen = xpath_len + 1 + nodename_len ;
+				sprintf( xpath + xpath_len , "/%.*s" , (int)node_len , node );
+				xpath_newlen = xpath_len + 1 + node_len ;
 			}
 			else if( xpath_len + 1 + 1 <= xpath_size-1 )
 			{
@@ -330,23 +441,13 @@ _SKIP2 :
 			}
 		}
 		
-		close_flag = 0 ;
-		while(1)
-		{
-			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
-			if( tag == FASTERXML_TOKEN_SLASH || tag == FASTERXML_TOKEN_RHAB )
-				close_flag = 1 ;
-			else if( tag == FASTERXML_TOKEN_RAB )
-				break;
-		}
-		
-		properties_len = begin - properties ;
+		properties_len = (*xml_ptr) - properties ;
 		
 		if( close_flag )
 		{
 			if( pfuncCallbackOnXmlNode )
 			{
-				nret = (*pfuncCallbackOnXmlNode)( FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , nodename , nodename_len , properties , properties_len , NULL , 0 , p ) ;
+				nret = (*pfuncCallbackOnXmlNode)( FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , node , node_len , properties , properties_len , NULL , 0 , p ) ;
 				if( nret > 0 )
 					break;
 				else if( nret < 0 )
@@ -361,22 +462,22 @@ _SKIP2 :
 		
 		TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
 		if( tag != FASTERXML_TOKEN_LAB )
-			return FASTERXML_ERROR_XML_INVALID;
+			return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_LAB;
 		
 		TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
 		if( tag == FASTERXML_TOKEN_SLASH )
 		{
 			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
-			if( STRNCMP( begin , != , nodename , MAX(len,nodename_len) ) )
-				return FASTERXML_ERROR_XML_INVALID;
+			if( STRNICMP( begin , != , node , MAX(len,node_len) ) )
+				return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_TEXT;
 			
 			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
 			if( tag != FASTERXML_TOKEN_RAB )
-				return FASTERXML_ERROR_XML_INVALID;
+				return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_RAB;
 			
 			if( pfuncCallbackOnXmlLeaf )
 			{
-				nret = (*pfuncCallbackOnXmlLeaf)( FASTERXML_NODE_LEAF , xpath , xpath_newlen , xpath_size , nodename , nodename_len , properties , properties_len , content , content_len , p ) ;
+				nret = (*pfuncCallbackOnXmlLeaf)( FASTERXML_NODE_LEAF , xpath , xpath_newlen , xpath_size , node , node_len , properties , properties_len , content , content_len , p ) ;
 				if( nret > 0 )
 					break;
 				else if( nret < 0 )
@@ -387,7 +488,7 @@ _SKIP2 :
 		{
 			if( pfuncCallbackOnEnterXmlNode )
 			{
-				nret = (*pfuncCallbackOnEnterXmlNode)( FASTERXML_NODE_ENTER | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , nodename , nodename_len , properties , properties_len , NULL , 0 , p ) ;
+				nret = (*pfuncCallbackOnEnterXmlNode)( FASTERXML_NODE_ENTER | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , node , node_len , properties , properties_len , NULL , 0 , p ) ;
 				if( nret > 0 )
 					break;
 				else if( nret < 0 )
@@ -404,15 +505,15 @@ _SKIP2 :
 				return nret;
 			
 			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
-			if( STRNCMP( begin , != , nodename , MAX(len,nodename_len) ) )
-				return FASTERXML_ERROR_XML_INVALID;
+			if( STRNICMP( begin , != , node , MAX(len,node_len) ) )
+				return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_TEXT;
 			
 			if( xpath )
 			{
-				if( xpath_len + 1 + nodename_len < xpath_size-1 - 1 )
+				if( xpath_len + 1 + node_len < xpath_size-1 - 1 )
 				{
-					sprintf( xpath + xpath_len , "/%.*s" , (int)nodename_len , nodename );
-					xpath_newlen = xpath_len + 1 + nodename_len ;
+					sprintf( xpath + xpath_len , "/%.*s" , (int)node_len , node );
+					xpath_newlen = xpath_len + 1 + node_len ;
 				}
 				else if( xpath_len + 1 + 1 <= xpath_size-1 )
 				{
@@ -427,7 +528,7 @@ _SKIP2 :
 			
 			if( pfuncCallbackOnLeaveXmlNode )
 			{
-				nret = (*pfuncCallbackOnLeaveXmlNode)( FASTERXML_NODE_LEAVE | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , nodename , nodename_len , NULL , 0 , content , content_len , p ) ;
+				nret = (*pfuncCallbackOnLeaveXmlNode)( FASTERXML_NODE_LEAVE | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , node , node_len , NULL , 0 , content , content_len , p ) ;
 				if( nret > 0 )
 					break;
 				else if( nret < 0 )
@@ -436,7 +537,7 @@ _SKIP2 :
 			
 			TOKENXML(*xml_ptr,begin,len,tag,FASTERXML_ERROR_XML_INVALID)
 			if( tag != FASTERXML_TOKEN_RAB )
-				return FASTERXML_ERROR_XML_INVALID;
+				return FASTERXML_ERROR_XML_INVALID-FASTERXML_TOKEN_RAB;
 		}
 	}
 	

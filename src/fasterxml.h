@@ -112,10 +112,12 @@
 
 /* fastxml */
 
+#define FASTERXML_ERROR_ALLOC			-9
 #define FASTERXML_ERROR_INTERNAL		-11
-#define FASTERXML_ERROR_XML_INVALID	-12
-#define FASTERXML_INFO_END_OF_BUFFER	13
+#define FASTERXML_INFO_END_OF_BUFFER		13
 #define FASTERXML_ERROR_FILENAME		-14
+#define FASTERXML_ERROR_TOO_MANY_SKIPTAGS	-15
+#define FASTERXML_ERROR_XML_INVALID		-100
 
 #define FASTERXML_NODE_BRANCH		0x10
 #define FASTERXML_NODE_LEAF		0x20
@@ -137,4 +139,7 @@ _WINDLL_FUNC int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_si
 				 , funcCallbackOnXmlNode *pfuncCallbackOnLeaveXmlNode
 				 , funcCallbackOnXmlNode *pfuncCallbackOnXmlLeaf
 				 , void *p );
+
+_WINDLL_FUNC int AddSkipXmlTag( char *tag );
+_WINDLL_FUNC void CleanSkipXmlTags();
 

@@ -31,10 +31,13 @@ c_FILE_CLEAN	=	$(c_FILE_o) $(c_FILE2_o) $(c_FILE3_o) $(c_FILE4_o) $(c_FILE5_o)
 c_FILE		=	\
 			test_fasterxml.c \
 			press_fasterxml.c \
+			test_fasterhtml.c \
 
 ###### 目标文件、安装目录配置区
-BIN		=	test_fasterxml \
+BIN		=	\
+			test_fasterxml \
 			press_fasterxml \
+			test_fasterhtml \
 
 ###### 编译选项
 CFLAGS		=	-I. \
@@ -108,4 +111,7 @@ test_fasterxml		:	test_fasterxml.o
 
 press_fasterxml		:	press_fasterxml.o
 	$(CC) -o $@ press_fasterxml.o $(LFLAGS)
+
+test_fasterhtml		:	test_fasterhtml.o
+	$(CC) -o $@ test_fasterhtml.o $(LFLAGS)
 
