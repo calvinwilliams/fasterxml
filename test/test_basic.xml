@@ -7,6 +7,6 @@
 	<self_branch />
 	<self_branch2/>
 	<branch_has_property propname1=propvalue1>
-		<leaf_has_property propname1="prop value1" propname2="prop value2" >content</leaf_has_property>
+		<leaf_has_property propname1="prop value1" propname2='prop value2' >content</leaf_has_property>
 	</branch_has_property>
 </root>

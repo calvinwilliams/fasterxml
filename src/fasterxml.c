@@ -19,7 +19,7 @@
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-int __FASTERXML_VERSION_1_0_1 ;
+int __FASTERXML_VERSION_1_0_2 ;
 
 #define MAXCNT_SKIPTAG		16
 
@@ -108,13 +108,14 @@ void CleanSkipXmlTags()
 		{							\
 			return _eof_ret_;				\
 		}							\
-		else if( (_base_)[0] == '\"' )				\
+		else if( (_base_)[0] == '"' || (_base_)[0] == '\'' )	\
 		{							\
+			char	mark = (_base_)[0] ;			\
 			(_base_)++;					\
 			(_begin_) = (_base_) ;				\
 			for( ; *(_base_) ; (_base_)++ )			\
 			{						\
-				if( *(_base_) == '\"' )			\
+				if( *(_base_) == mark )			\
 					break;				\
 			}						\
 			(_len_) = (_base_) - (_begin_) ;		\

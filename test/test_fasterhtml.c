@@ -148,6 +148,8 @@ int main( int argc , char *argv[] )
 	AddSkipXmlTag( "span" );
 	AddSkipXmlTag( "br" );
 	AddSkipXmlTag( "p" );
+	AddSkipXmlTag( "image" );
+	AddSkipXmlTag( "link" );
 	
 	if( argc == 1 + 1 )
 	{

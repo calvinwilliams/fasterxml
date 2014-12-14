@@ -1,3 +1,10 @@
+#ifndef _H_FASTERXML_
+#define _H_FASTERXML_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -142,4 +149,10 @@ _WINDLL_FUNC int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_si
 
 _WINDLL_FUNC int AddSkipXmlTag( char *tag );
 _WINDLL_FUNC void CleanSkipXmlTags();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 
