@@ -27,6 +27,8 @@ char	*g_pcSkipXmlTags[ MAXCNT_SKIPTAG + 1 ] = { NULL } ;
 int	g_nSkipXmlTagsLen[ MAXCNT_SKIPTAG + 1 ] = { 0 } ;
 int	g_nSkipXmlTagCount = 0 ;
 
+#define FASTERXML_INFO_END_OF_BUFFER		13
+
 int AddSkipXmlTag( char *tag )
 {
 	if( g_nSkipXmlTagCount + 1 > MAXCNT_SKIPTAG )
@@ -551,12 +553,18 @@ int TravelXmlBuffer( char *xml_buffer , char *xpath , int xpath_size
 {
 	char		*xml_ptr = xml_buffer ;
 	
-	return _TravelXmlBuffer( & xml_ptr , xpath , 0 , xpath_size
+	int		nret = 0 ;
+	
+	nret = _TravelXmlBuffer( & xml_ptr , xpath , 0 , xpath_size
 				, pfuncCallbackOnXmlNode
 				, pfuncCallbackOnXmlNode
 				, pfuncCallbackOnXmlNode
 				, pfuncCallbackOnXmlNode
-				, p , NULL , 0 );
+				, p , NULL , 0 ) ;
+	if( nret == 0 || nret == FASTERXML_INFO_END_OF_BUFFER )
+		return 0;
+	else
+		return nret;
 }
 
 int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_size
@@ -568,11 +576,17 @@ int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_size
 {
 	char		*xml_ptr = xml_buffer ;
 	
-	return _TravelXmlBuffer( & xml_ptr , xpath , 0 , xpath_size
+	int		nret = 0 ;
+	
+	nret = _TravelXmlBuffer( & xml_ptr , xpath , 0 , xpath_size
 				, pfuncCallbackOnXmlNode
 				, pfuncCallbackOnEnterXmlNode
 				, pfuncCallbackOnLeaveXmlNode
 				, pfuncCallbackOnXmlLeaf
-				, p , NULL , 0 );
+				, p , NULL , 0 ) ;
+	if( nret == 0 || nret == FASTERXML_INFO_END_OF_BUFFER )
+		return 0;
+	else
+		return nret;
 }
 

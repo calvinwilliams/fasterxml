@@ -149,7 +149,9 @@ int main( int argc , char *argv[] )
 	AddSkipXmlTag( "br" );
 	AddSkipXmlTag( "p" );
 	AddSkipXmlTag( "image" );
+	AddSkipXmlTag( "img" );
 	AddSkipXmlTag( "link" );
+	AddSkipXmlTag( "input" );
 	
 	if( argc == 1 + 1 )
 	{
@@ -160,6 +162,38 @@ int main( int argc , char *argv[] )
 		{
 			printf( "ReadEntireFileSafely[%s] failed[%d]\n" , argv[1] , nret );
 			return nret;
+		}
+		
+		{
+			char	*ptr = NULL ;
+			while( ( ptr = strstr( xml_buffer , "<br>" ) ) )
+				memset( ptr , ' ' , 4 );
+			while( ( ptr = strstr( xml_buffer , "</br>" ) ) )
+				memset( ptr , ' ' , 5 );
+			/*
+			while( ( ptr = strstr( xml_buffer , "<tbody>" ) ) )
+				memset( ptr , ' ' , 7 );
+			while( ( ptr = strstr( xml_buffer , "</tbody>" ) ) )
+				memset( ptr , ' ' , 8 );
+			while( ( ptr = strstr( xml_buffer , "{{/ each }}\n</script>\n<script id=\"collection2-template\" type=\"text/x-handlebars-template\">" ) ) )
+				memcpy( ptr , "   </table>" , 11 );
+			while( ( ptr = strstr( xml_buffer , "{{/ each }}\n</script>\n<script id=\"confirm-loan-template\" type=\"text/x-handlebars-template\">" ) ) )
+				memcpy( ptr , "   </table>" , 11 );
+			while( ( ptr = strstr( xml_buffer , " />理财管理" ) ) )
+				memcpy( ptr , "  " , 2 );
+			while( ( ptr = strstr( xml_buffer , " />借款管理" ) ) )
+				memcpy( ptr , "  " , 2 );
+			while( ( ptr = strstr( xml_buffer , " />我的人人贷" ) ) )
+				memcpy( ptr , "  " , 2 );
+			while( ( ptr = strstr( xml_buffer , "{{# if button }}" ) ) )
+				memset( ptr , ' ' , 16 );
+			while( ( ptr = strstr( xml_buffer , "{{/ if }}" ) ) )
+				memset( ptr , ' ' , 9 );
+			while( ( ptr = strstr( xml_buffer , "i < bduidArr.length" ) ) )
+				memset( ptr + 2 , ' ' , 1 );
+			while( ( ptr = strstr( xml_buffer , "i <= 1;" ) ) )
+				memset( ptr + 2 , ' ' , 1 );
+			*/
 		}
 		
 		memset( xpath , 0x00 , sizeof(xpath) );
