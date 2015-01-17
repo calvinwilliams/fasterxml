@@ -160,7 +160,7 @@ int main( int argc , char *argv[] )
 		memset( xpath , 0x00 , sizeof(xpath) );
 		nret = TravelXmlBuffer( xml_buffer , xpath , sizeof(xpath) , & CallbackOnXmlNode , p ) ;
 		free( xml_buffer );
-		if( nret && nret != FASTERXML_INFO_END_OF_BUFFER )
+		if( nret )
 		{
 			printf( "TravelXmlTree failed[%d]\n" , nret );
 			return nret;

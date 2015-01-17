@@ -19,7 +19,7 @@
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-int __FASTERXML_VERSION_1_0_2 ;
+int __FASTERXML_VERSION_1_0_3 ;
 
 #define MAXCNT_SKIPTAG		16
 
@@ -491,7 +491,7 @@ _PREREAD_GO :
 		{
 			if( pfuncCallbackOnEnterXmlNode )
 			{
-				nret = (*pfuncCallbackOnEnterXmlNode)( FASTERXML_NODE_ENTER | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , node , node_len , properties , properties_len , NULL , 0 , p ) ;
+				nret = (*pfuncCallbackOnEnterXmlNode)( FASTERXML_NODE_ENTER | FASTERXML_NODE_BRANCH , xpath , xpath_newlen , xpath_size , node , node_len , properties , properties_len , content , content_len , p ) ;
 				if( nret > 0 )
 					break;
 				else if( nret < 0 )

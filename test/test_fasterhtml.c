@@ -114,15 +114,15 @@ int CallbackOnXmlNode( int type , char *xpath , int xpath_len , int xpath_size ,
 	{
 		if( type & FASTERXML_NODE_ENTER )
 		{
-			printf( "ENTER-BRANCH p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties );
+			printf( "ENTER-BRANCH p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s] content[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties , content_len , content );
 		}
 		else if( type & FASTERXML_NODE_LEAVE )
 		{
-			printf( "LEAVE-BRANCH p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties );
+			printf( "LEAVE-BRANCH p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s] content[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties , content_len , content );
 		}
 		else
 		{
-			printf( "BRANCH       p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties );
+			printf( "BRANCH       p[%s] xpath[%.*s] nodename[%.*s] properties[%.*s] content[%.*s]\n" , (char*)p , xpath_len , xpath , nodename_len , nodename , properties_len , properties , content_len , content );
 		}
 	}
 	else if( type & FASTERXML_NODE_LEAF )
@@ -199,7 +199,7 @@ int main( int argc , char *argv[] )
 		memset( xpath , 0x00 , sizeof(xpath) );
 		nret = TravelXmlBuffer( xml_buffer , xpath , sizeof(xpath) , & CallbackOnXmlNode , p ) ;
 		free( xml_buffer );
-		if( nret && nret != FASTERXML_INFO_END_OF_BUFFER )
+		if( nret )
 		{
 			printf( "TravelXmlTree failed[%d]\n" , nret );
 			return nret;
