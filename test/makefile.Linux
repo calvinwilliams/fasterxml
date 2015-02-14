@@ -41,11 +41,11 @@ BIN		=	\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			/usr/include/fasterxml \
+			-I/usr/include/fasterxml \
 
 ###### 链接选项
 LFLAGS		=	-L. \
-			/usr/lib \
+			-L/usr/lib \
 			-lfasterxml \
 
 ###### 额外宏定义区
