@@ -20,11 +20,11 @@ BIN		=	\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I/usr/local/include/fasterxml \
+			-I$(HOME)/include/fasterxml \
 
 ###### 链接选项
 LFLAGS		=	-L. \
-			-L/usr/local/lib \
+			-L$(HOME)/lib \
 			-lfasterxml \
 
 ###### 额外宏定义区
