@@ -1,5 +1,6 @@
 ver 1.0.3	2015-01-08	calvin
-		* add content on enter node event between two open tags
+		* Add content on enter node event between two open tags
+		* Adjust makefile*
 
 ver 1.0.2	2014-12-14	calvin
 		* Fixed a problems that string enclosed in single-quotation
@@ -9,4 +10,4 @@ ver 1.0.1	2014-11-19	calvin
 		* Add function AddSkipXmlTag,CleanSkipXmlTags for parse HTML
 
 ver 1.0.0	2014-09-16	calvin
-		* create
+		* Create

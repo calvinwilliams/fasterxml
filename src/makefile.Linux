@@ -33,11 +33,11 @@ c_FILE		=	\
 
 ###### 目标文件、安装目录配置区
 LIB		=	libfasterxml.so
-LIBINST		=	/usr/lib
-HDER		= \
+LIBINST		=	/usr/local/lib
+HDER		=	\
 			fasterxml.h \
 
-HDERINST	=	/usr/include/fasterxml
+HDERINST	=	/usr/local/include/fasterxml
 
 ###### 编译选项
 CFLAGS		=	-I. \

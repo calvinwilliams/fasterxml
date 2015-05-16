@@ -20,11 +20,11 @@ BIN		=	\
 
 ###### 编译选项
 CFLAGS		=	-I. \
-			-I$(HOME)/exinc/fasterxml \
+			-I/usr/local/include/fasterxml \
 
 ###### 链接选项
 LFLAGS		=	-L. \
-			-L$(HOME)/exlib \
+			-L/usr/local/lib \
 			-lfasterxml \
 
 ###### 额外宏定义区
@@ -35,7 +35,8 @@ CLEAN_ADDITION	=
 #@ make_clean
 #@ make_install
 #@ make_install_BININST
-#@ make_install_DFTHDERINST
+#@ make_install_LIBINST
+#@ make_install_HDERINST
 
 include $(MKTPLDIR)/makeobj_$(MKTPLOS).inc
 
