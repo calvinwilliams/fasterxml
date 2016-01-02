@@ -19,7 +19,7 @@
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-int __FASTERXML_VERSION_1_0_3 ;
+int __FASTERXML_VERSION_1_0_4 ;
 
 #define MAXCNT_SKIPTAG		16
 
