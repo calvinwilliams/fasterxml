@@ -65,6 +65,7 @@ void CleanSkipXmlTags()
 #define FASTERXML_TOKEN_RAB		4	/* > */
 #define FASTERXML_TOKEN_RHAB		5	/* ?> */
 #define FASTERXML_TOKEN_TEXT		6
+#define FASTERXML_TOKEN_TEXT_CDATA	61	/* <![CDATA[...]]> */
 #define FASTERXML_TOKEN_PROPNAME	11
 #define FASTERXML_TOKEN_PROPVALUE	12
 #define FASTERXML_TOKEN_EQ		15
@@ -207,20 +208,37 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 #define TOKENCONTENT(_base_,_begin_,_len_,_tag_)			\
 	do								\
 	{								\
+		int	CDATA_flag = 0 ;				\
 		(_begin_) = (_base_) ;					\
 		for( ; *(_base_) ; (_base_)++ )				\
 		{							\
 			if( (unsigned char)*(_base_) > 127 )		\
 				continue;				\
-			if( *(_base_) == '<' )				\
-				break;					\
+			if( CDATA_flag == 0 && *(_base_) == '<' )	\
+			{						\
+				if( memcmp((_base_+1),"![CDATA[",8) == 0 )\
+					CDATA_flag = 1 ;		\
+				else					\
+					break;				\
+			}						\
+			else if( CDATA_flag == 1 && *(_base_) == ']' )	\
+			{						\
+				if( memcmp((_base_+1),"]>",2) == 0 )	\
+				{					\
+					(_base_) += 3 ;			\
+					break;				\
+				}					\
+			}						\
 		}							\
 		if( *(_base_) == '\0' )					\
 		{							\
 			return FASTERXML_ERROR_XML_INVALID;		\
 		}							\
 		(_len_) = (_base_) - (_begin_) ;			\
-		(_tag_) = FASTERXML_TOKEN_TEXT ;			\
+		if( CDATA_flag == 0 )					\
+			(_tag_) = FASTERXML_TOKEN_TEXT ;		\
+		else							\
+			(_tag_) = FASTERXML_TOKEN_TEXT_CDATA ;		\
 	}								\
 	while(0);							\
 
@@ -330,7 +348,7 @@ static int _TravelXmlBuffer( register char **xml_ptr , char *xpath , int xpath_l
 {
 	char		*begin = NULL ;
 	int		len ;
-	signed char	tag ;
+	signed char	tag , tag2 ;
 	
 	int		close_flag ;
 	int		i ;
@@ -459,7 +477,7 @@ _PREREAD_GO :
 			continue;
 		}
 		
-		TOKENCONTENT(*xml_ptr,begin,len,tag)
+		TOKENCONTENT(*xml_ptr,begin,len,tag2)
 		content = begin ;
 		content_len = len ;
 		

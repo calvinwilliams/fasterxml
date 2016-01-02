@@ -34,6 +34,12 @@ extern "C" {
 					(_buf_len_) = -1 ;		\
 					break;				\
 				}					\
+				else if( memcmp((_buf_)+1,"![CDATA[",8) == 0 )	\
+				{						\
+					(_buf_) += (_buf_len_) ;		\
+					(_buf_remain_len_) -= (_buf_len_) ;	\
+					break;					\
+				}						\
 				memmove( (_buf_)+4 , (_buf_)+1 , (_buf_len_)-_newlen_-1 );	\
 				memcpy( (_buf_) , "&lt;" , 4 );		\
 				(_buf_) += 4 ;				\

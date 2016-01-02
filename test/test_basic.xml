@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
 	<leaf>content</leaf>
+	<cdata_leaf><![CDATA[cdata_<a>]]</a>_content]]></cdata_leaf>
 	<sub_branch>
 		<sub_leaf>sub_content</sub_leaf>
 	</sub_branch>

@@ -1,3 +1,6 @@
+ver 1.0.4	2016-01-02	calvin
+		* Support CDATA
+
 ver 1.0.3	2015-01-08	calvin
 		* Add content on enter node event between two open tags
 		* Adjust makefile*
