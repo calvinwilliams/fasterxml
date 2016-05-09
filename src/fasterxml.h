@@ -137,8 +137,8 @@ extern "C" {
 #define FASTERXML_NODE_ENTER		0x01
 #define FASTERXML_NODE_LEAVE		0x02
 
-typedef int funcCallbackOnXmlProperty( char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , void *p );
-_WINDLL_FUNC int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpath , int xpath_len , int xpath_size
+typedef int funcCallbackOnXmlProperty( int type , char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , char *content , int content_len , void *p );
+_WINDLL_FUNC int TravelXmlPropertiesBuffer( char *properties , int properties_len , int type , char *xpath , int xpath_len , int xpath_size , char *content , int content_len
 					   , funcCallbackOnXmlProperty *pfuncCallbackOnXmlProperty
 					   , void *p );
 
@@ -154,6 +154,7 @@ _WINDLL_FUNC int TravelXmlBuffer4( char *xml_buffer , char *xpath , int xpath_si
 				 , void *p );
 
 _WINDLL_FUNC int AddSkipXmlTag( char *tag );
+_WINDLL_FUNC int AddSkipHtmlTags();
 _WINDLL_FUNC void CleanSkipXmlTags();
 
 #ifdef __cplusplus

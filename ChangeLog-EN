@@ -1,5 +1,9 @@
+ver 1.1.0	2016-05-09	calvin
+		* Modify function prototype on parser properties buffer and properties callback ***NO COMPATIBLE WARNNING***
+
 ver 1.0.5	2016-05-08	calvin
 		* Fixed some bugs
+		* Add function AddSkipHtmlTags
 
 ver 1.0.4	2016-01-02	calvin
 		* Support CDATA

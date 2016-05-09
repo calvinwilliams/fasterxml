@@ -98,9 +98,9 @@ static int ReadEntireFileSafely( char *filename , char *mode , char **pbuf , lon
 }
 
 funcCallbackOnXmlProperty CallbackOnXmlProperty ;
-int CallbackOnXmlProperty( char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , void *p )
+int CallbackOnXmlProperty( int type , char *xpath , int xpath_len , int xpath_size , char *propname , int propname_len , char *propvalue , int propvalue_len , char *content , int content_len , void *p )
 {
-	printf( "    PROPERTY p[%s] xpath[%.*s] propname[%.*s] propvalue[%.*s]\n" , (char*)p , xpath_len , xpath , propname_len , propname , propvalue_len , propvalue );
+	printf( "    PROPERTY p[%s] xpath[%.*s] propname[%.*s] propvalue[%.*s] content[%.*s]\n" , (char*)p , xpath_len , xpath , propname_len , propname , propvalue_len , propvalue , content_len , content );
 	
 	return 0;
 }
@@ -132,7 +132,7 @@ int CallbackOnXmlNode( int type , char *xpath , int xpath_len , int xpath_size ,
 	
 	if( properties && properties[0] )
 	{
-		nret = TravelXmlPropertiesBuffer( properties , properties_len , xpath , xpath_len , xpath_size , & CallbackOnXmlProperty , p ) ;
+		nret = TravelXmlPropertiesBuffer( properties , properties_len , type , xpath , xpath_len , xpath_size , content , content_len , & CallbackOnXmlProperty , p ) ;
 		if ( nret )
 			return nret;
 	}

@@ -19,9 +19,9 @@
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-int __FASTERXML_VERSION_1_0_5 ;
+int __FASTERXML_VERSION_1_1_0 ;
 
-#define MAXCNT_SKIPTAG		16
+#define MAXCNT_SKIPTAG		64
 
 char	*g_pcSkipXmlTags[ MAXCNT_SKIPTAG + 1 ] = { NULL } ;
 int	g_nSkipXmlTagsLen[ MAXCNT_SKIPTAG + 1 ] = { 0 } ;
@@ -44,6 +44,30 @@ int AddSkipXmlTag( char *tag )
 	return 0;
 }
 
+int AddSkipHtmlTags()
+{
+	AddSkipXmlTag( "br" );
+	AddSkipXmlTag( "hr" );
+	AddSkipXmlTag( "image" );
+	AddSkipXmlTag( "img" );
+	AddSkipXmlTag( "input" );
+	AddSkipXmlTag( "link" );
+	AddSkipXmlTag( "meta" );
+	
+	AddSkipXmlTag( "area" );
+	AddSkipXmlTag( "base" );
+	AddSkipXmlTag( "col" );
+	AddSkipXmlTag( "command" );
+	AddSkipXmlTag( "embed" );
+	AddSkipXmlTag( "keygen" );
+	AddSkipXmlTag( "param" );
+	AddSkipXmlTag( "source" );
+	AddSkipXmlTag( "track" );
+	AddSkipXmlTag( "wbr" );
+	
+	return 0;
+}
+
 void CleanSkipXmlTags()
 {
 	for( g_nSkipXmlTagCount-- ; g_nSkipXmlTagCount >= 0 ; g_nSkipXmlTagCount-- )
@@ -55,6 +79,9 @@ void CleanSkipXmlTags()
 			g_nSkipXmlTagsLen[g_nSkipXmlTagCount] = 0 ;
 		}
 	}
+	
+	g_nSkipXmlTagCount = 0 ;
+	
 	return;
 }
 
@@ -137,7 +164,7 @@ void CleanSkipXmlTags()
 			(_begin_) = (_base_) ;				\
 			for( ; *(_base_) ; (_base_)++ )			\
 			{						\
-				if( strchr( " \t\r\n=?/>" , *(_base_) ) )	\
+				if( strchr( " \t\r\n=?>" , *(_base_) ) )\
 					break;				\
 			}						\
 			(_len_) = (_base_) - (_begin_) ;		\
@@ -146,7 +173,7 @@ void CleanSkipXmlTags()
 	}								\
 	while(0);							\
 
-int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpath , int xpath_len , int xpath_size , funcCallbackOnXmlProperty *pfuncCallbackOnXmlProperty , void *p )
+int TravelXmlPropertiesBuffer( char *properties , int properties_len , int type , char *xpath , int xpath_len , int xpath_size , char *content , int content_len , funcCallbackOnXmlProperty *pfuncCallbackOnXmlProperty , void *p )
 {
 	char		*begin = NULL ;
 	int		len ;
@@ -166,7 +193,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 		propname = begin ;
 		propname_len = len ;
 		
-		if( properties[0] == ' ' )
+		if( properties[0] == ' ' || properties[0] == '>' )
 		{
 			propvalue = "" ;
 			propvalue_len = 0 ;
@@ -202,7 +229,7 @@ int TravelXmlPropertiesBuffer( char *properties , int properties_len , char *xpa
 				}
 			}
 			
-			nret = (*pfuncCallbackOnXmlProperty)( xpath , xpath_newlen , xpath_size , propname , propname_len , propvalue , propvalue_len , p ) ;
+			nret = (*pfuncCallbackOnXmlProperty)( type , xpath , xpath_newlen , xpath_size , propname , propname_len , propvalue , propvalue_len , content , content_len , p ) ;
 			if( nret > 0 )
 				break;
 			else if( nret < 0 )
@@ -431,14 +458,12 @@ _PREREAD_GO :
 				if( *(*xml_ptr) == '\0' )
 					return FASTERXML_ERROR_END_OF_BUFFER;
 			}
-			/*
-			else if( *(*xml_ptr) == '/' && *((*xml_ptr)+1) == '>' )
+			else if( *((*xml_ptr)-1) == ' ' && *(*xml_ptr) == '/' && *((*xml_ptr)+1) == '>' )
 			{
 				close_flag = 1 ;
 				(*xml_ptr)+=2;
 				break;
 			}
-			*/
 			else if( *(*xml_ptr) == '>' )
 			{
 				(*xml_ptr)++;
