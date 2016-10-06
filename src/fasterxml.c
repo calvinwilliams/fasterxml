@@ -19,7 +19,7 @@
 #define MAX(_a_,_b_) (_a_>_b_?_a_:_b_)
 #endif
 
-int __FASTERXML_VERSION_1_1_0 ;
+int __FASTERXML_VERSION_1_1_1 ;
 
 #define MAXCNT_SKIPTAG		64
 
@@ -458,7 +458,7 @@ _PREREAD_GO :
 				if( *(*xml_ptr) == '\0' )
 					return FASTERXML_ERROR_END_OF_BUFFER;
 			}
-			else if( *((*xml_ptr)-1) == ' ' && *(*xml_ptr) == '/' && *((*xml_ptr)+1) == '>' )
+			else if( *(*xml_ptr) == '/' && *((*xml_ptr)+1) == '>' ) /* <.../> is valid */
 			{
 				close_flag = 1 ;
 				(*xml_ptr)+=2;

@@ -1,3 +1,6 @@
+ver 1.1.1	2016-10-06	calvin
+		* Allow <.../> , Previously only allowed <... />
+
 ver 1.1.0	2016-05-09	calvin
 		* Modify function prototype on parser properties buffer and properties callback ***NO COMPATIBLE WARNNING***
 
